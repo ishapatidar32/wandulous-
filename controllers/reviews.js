@@ -6,7 +6,11 @@ module.exports.addReviewsToListing = async(req,res) =>{ // wrapasync for error h
    newReview.author = req.user._id;
    listing.reviews.push(newReview);
    await newReview.save();
-   await listing.save();
+   // Use findByIdAndUpdate with $push to avoid full document validation
+   // This prevents geometry validation errors when adding reviews
+   await Listing.findByIdAndUpdate(req.params.id, {
+     $push: { reviews: newReview._id }
+   });
    console.log("new review is save");
     req.flash("success","new Review Created !");
    res.redirect(`/listings/${listing._id}`);

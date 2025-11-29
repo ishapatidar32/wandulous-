@@ -18,7 +18,7 @@ const listingrout = require("./routes/listings.js");
 const reviewrout = require("./routes/review.js");
 const userrout = require("./routes/user.js");
 
-let port = 8080;
+let port = process.env.PORT || 8080;
 const path = require("path");
 const ejsMate = require("ejs-mate");
 app.set("view engine","ejs");
@@ -27,22 +27,22 @@ app.engine("ejs",ejsMate);
 app.use(express.urlencoded({extended : true}));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname,"/public")));
-const dbUrl = process.env.ATLASDB_URL;
+const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/wanderlust";
 
 const store = MongoStore.create({
     mongoUrl : dbUrl,
     crypto: {
-        secret: process.env.SECRET,
+        secret: process.env.SECRET || "mysupersecretstring",
     },
     touchAfter: 24*3600,  // thime in sec
 });
-store.on("error",() =>{
+store.on("error",(err) =>{
     console.log("Error in Mongo Session Store",err);
 }); 
 
 const sessionOptions = {  // store the info of user  the 14 day expire session (the user will logout after 14 day if hi oe shi do not do any activity on weside cooke will delete  )
     store,
-    secret : process.env.SECRET,
+    secret : process.env.SECRET || "mysupersecretstring",
      resave: false,
     saveUninitialized : true ,
     cookie : {
@@ -52,14 +52,6 @@ const sessionOptions = {  // store the info of user  the 14 day expire session (
     },
 };
 
-main()
-  .then(() =>{
-    console.log("connection successful");
-   })
-   .catch((err) => console.log(err));
-async function main() {
-    await mongoose.connect(dbUrl);
-}
 app.use(session(sessionOptions));
 app.use(flash());
 
@@ -90,9 +82,22 @@ app.use((err,req,res,next) =>{
    // res.status(statusCode).send(message);
    res.status(statusCode).render("error.ejs",{ message});
 });
-app.listen(port,() =>{
-    console.log("port is lesing");
-});
+
+async function main() {
+    await mongoose.connect(dbUrl);
+    console.log("Database connection successful");
+}
+
+main()
+  .then(() =>{
+    app.listen(port,() =>{
+        console.log(`Server is listening on port ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.log("Database connection error:", err);
+    process.exit(1);
+  });
 
 
 
@@ -112,3 +117,4 @@ app.listen(port,() =>{
 // to deploy we can use mongo atlas to deploy ower data base to cloud 
 // express have local storage only for devlupment env not for production 
 // deployment - render 
+//need to do more updation need to add mediaquery and good phone view and also navebar option need to make them working 
