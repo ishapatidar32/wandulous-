@@ -27,7 +27,7 @@ module.exports.addnewlisting = async (req,res,next) =>{
      query: req.body.listing.location, 
       limit: 1,
     })
-  .send()
+  .send();
     
      let url = req.file.path;
      let filename = req.file.filename;
