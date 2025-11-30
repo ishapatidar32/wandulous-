@@ -32,7 +32,7 @@ const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/wanderlust";
 const store = MongoStore.create({
     mongoUrl : dbUrl,
     crypto: {
-        secret: process.env.SECRET || "mysupersecretstring",
+        secret: process.env.SECRET /*|| "mysupersecretstring"*/,
     },
     touchAfter: 24*3600,  // thime in sec
 });
@@ -42,7 +42,7 @@ store.on("error",(err) =>{
 
 const sessionOptions = {  // store the info of user  the 14 day expire session (the user will logout after 14 day if hi oe shi do not do any activity on weside cooke will delete  )
     store,
-    secret : process.env.SECRET || "mysupersecretstring",
+    secret : process.env.SECRET /*|| "mysupersecretstring"*/,
      resave: false,
     saveUninitialized : true ,
     cookie : {
@@ -71,7 +71,7 @@ app.use("/listings",listingrout);
 app.use("/listings/:id/reviews",reviewrout);
 app.use("/",userrout);
 app.get("/",(req,res) =>{
-    res.send("working");
+    res.redirect("/listings");
 });
 app.all(/.*/,(req,res,next) =>{
     next(new ExpressError(404,"page Not Found !"));
